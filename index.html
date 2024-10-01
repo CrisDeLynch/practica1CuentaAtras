@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta Atrás</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: black;
+            font-size: 28px;
+        }
+
+        #contenedor {
+            text-align: center;
+            width: 40%;
+            height: auto;
+            background-color: #ffffff;
+            padding: 30px;
+            margin-top: 15%;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: center;
+        }
+
+        input {
+            padding: 15px;
+            width: 80%;
+            font-size: 18px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        button {
+            padding: 15px;
+            width: 82%;
+            font-size: 18px;
+            background-color: #ff82b6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background-color: #fd4c96;
+        }
+
+        #tiempo-restante {
+            font-size: 25px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="contenedor">
+        <div id="tiempo-restante"></div>
+    </div>
+
+    <script>
+        const contenedor = document.getElementById('contenedor');
+        const tiempoRestanteTexto = document.getElementById('tiempo-restante');
+
+        const tablaContador = document.createElement('table');
+        let thead = document.createElement("thead");
+        let tbody = document.createElement("tbody");
+        let fila = document.createElement("tr");
+
+        let colum1_th = document.createElement("th");
+        let colum2_th = document.createElement("th");
+        let colum3_th = document.createElement("th");
+        let colum4_th = document.createElement("th");
+        let colum5_th = document.createElement("th");
+
+        colum1_th.textContent = "Meses";
+        colum2_th.textContent = "Días";
+        colum3_th.textContent = "Horas";
+        colum4_th.textContent = "Minutos";
+        colum5_th.textContent = "Segundos";
+
+        fila.append(colum1_th, colum2_th, colum3_th, colum4_th, colum5_th);
+        thead.appendChild(fila);
+        tablaContador.append(thead, tbody);
+        contenedor.append(tablaContador);
+
+        let fila1 = document.createElement("tr");
+        let colum1_td = document.createElement("td");
+        let colum2_td = document.createElement("td");
+        let colum3_td = document.createElement("td");
+        let colum4_td = document.createElement("td");
+        let colum5_td = document.createElement("td");
+
+        fila1.append(colum1_td, colum2_td, colum3_td, colum4_td, colum5_td);
+        tbody.append(fila1);
+
+        let texto = document.createElement("input");
+        texto.placeholder = "DD-MM-AAAA HH:MM";
+        contenedor.append(texto);
+
+        let boton = document.createElement("button");
+        boton.textContent = "Cambiar fecha";
+        boton.onclick = cambiarFecha;
+        contenedor.append(boton);
+
+        let fechaLlegada = new Date();
+
+        function actualizarContador() {
+            const ahora = new Date();
+            const diferencia = fechaLlegada - ahora;
+
+            if (diferencia <= 0) {
+                colum1_td.textContent = 0;
+                colum2_td.textContent = 0;
+                colum3_td.textContent = 0;
+                colum4_td.textContent = 0;
+                colum5_td.textContent = 0;
+                return;
+            }
+
+            const meses = Math.floor(diferencia / (1000 * 60 * 60 * 24 * 30));
+            const dias = Math.floor((diferencia / (1000 * 60 * 60 * 24)) % 30);
+            const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
+            const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
+            const segundos = Math.floor((diferencia / 1000) % 60);
+
+            colum1_td.textContent = meses;
+            colum2_td.textContent = dias;
+            colum3_td.textContent = horas;
+            colum4_td.textContent = minutos;
+            colum5_td.textContent = segundos;
+
+            tiempoRestanteTexto.textContent = "Para la fecha " + fechaLlegada.toLocaleString() + " quedan...";
+
+            if (diferencia > 1209600000) {
+                tablaContador.style.color = 'green';
+            } else if (diferencia < 604800000) {
+                tablaContador.style.color = 'red';
+            } else {
+                tablaContador.style.color = 'orange';
+            }
+        }
+
+        function cambiarFecha() {
+            const fechaPuesta = texto.value;
+            const comprobar = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}$/;
+
+            if (!comprobar.test(fechaPuesta)) {
+                tiempoRestanteTexto.textContent = "Formato inválido. Usa DD-MM-AAAA HH:MM";
+                return;
+            }
+
+            const partes = fechaPuesta.split(' ');
+            const fecha = partes[0];
+            const hora = partes[1];
+
+            const dia = parseInt(fecha.split('-')[0]);
+            const mes = parseInt(fecha.split('-')[1]);
+            const anio = parseInt(fecha.split('-')[2]);
+
+            const horas = parseInt(hora.split(':')[0]);
+            const minutos = parseInt(hora.split(':')[1]);
+
+            const nuevaFecha = new Date(anio, mes - 1, dia, horas, minutos);
+
+            if (!isNaN(nuevaFecha.getTime())) {
+                fechaLlegada = nuevaFecha;
+                actualizarContador();
+            } 
+        }
+
+
+        setInterval(actualizarContador, 1000);
+    </script>
+</body>
+
+</html>
